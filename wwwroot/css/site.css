@@ -412,6 +412,7 @@ button, input, select, textarea {
   padding: 8px;
   cursor: pointer;
   color: var(--color-ink);
+  margin-left: auto;
 }
 .nav-desktop-only { display: revert; }
 .nav-mobile-only { display: none; }

@@ -31,7 +31,14 @@
                     <div class="book-card" style="min-width: 220px;">
                         <a href="/Books/Details/@book.Id" style="text-decoration: none; color: inherit;">
                             <div class="book-card-img">
-                                <span>📖</span>
+                                @if (!string.IsNullOrEmpty(book.CoverImage))
+                                {
+                                    <img src="@book.CoverImage" alt="@book.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <span>📖</span>
+                                }
                             </div>
                             <div class="book-card-body">
                                 <h3 class="book-card-title">@book.Title</h3>
@@ -65,7 +72,14 @@
                 <div class="book-card">
                     <a href="/Books/Details/@book.Id" style="text-decoration: none; color: inherit;">
                         <div class="book-card-img">
-                            <span>📖</span>
+                            @if (!string.IsNullOrEmpty(book.CoverImage))
+                            {
+                                <img src="@book.CoverImage" alt="@book.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <span>📖</span>
+                            }
                         </div>
                         <div class="book-card-body">
                             <h3 class="book-card-title">@book.Title</h3>
@@ -86,12 +100,12 @@
     </div>
 </section>
 
-<section class="section bg-dark" style="color: var(--color-on-dark);">
+<section class="section bg-surface-card">
     <div class="container text-center">
-        <h2 style="color: var(--color-on-dark); font-size: 36px; margin-bottom: var(--space-md);">Ready to Start Reading?</h2>
-        <p style="font-size: 18px; opacity: 0.9; margin-bottom: var(--space-lg); max-width: 500px; margin-left: auto; margin-right: auto;">
+        <h2 style="font-size: 36px; margin-bottom: var(--space-md);">Ready to Start Reading?</h2>
+        <p style="font-size: 18px; color: var(--color-muted); margin-bottom: var(--space-lg); max-width: 500px; margin-left: auto; margin-right: auto;">
             Create an account to build your wishlist, write reviews, and track your orders.
         </p>
-        <a href="/Account/Register" class="btn btn-lg" style="background: var(--color-on-dark); color: var(--color-primary);">Create Account</a>
+        <a href="/Account/Register" class="btn btn-primary btn-lg">Create Account</a>
     </div>
 </section>

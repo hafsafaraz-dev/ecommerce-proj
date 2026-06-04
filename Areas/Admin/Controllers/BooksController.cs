@@ -40,8 +40,18 @@ public class BooksController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Book book)
+    public async Task<IActionResult> Create(Book book, IFormFile? CoverImageFile)
     {
+        if (CoverImageFile != null && CoverImageFile.Length > 0)
+        {
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(CoverImageFile.FileName);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "books", fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await CoverImageFile.CopyToAsync(stream);
+            }
+            book.CoverImage = "/images/books/" + fileName;
+        }
         book.CreatedAt = DateTime.UtcNow;
         book.UpdatedAt = DateTime.UtcNow;
         _context.Books.Add(book);
@@ -60,7 +70,7 @@ public class BooksController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Book book)
+    public async Task<IActionResult> Edit(int id, Book book, IFormFile? CoverImageFile)
     {
         var existing = await _context.Books.FindAsync(id);
         if (existing == null) return NotFound();
@@ -74,6 +84,17 @@ public class BooksController : Controller
         existing.CategoryId = book.CategoryId;
         existing.IsFeatured = book.IsFeatured;
         existing.UpdatedAt = DateTime.UtcNow;
+
+        if (CoverImageFile != null && CoverImageFile.Length > 0)
+        {
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(CoverImageFile.FileName);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "books", fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await CoverImageFile.CopyToAsync(stream);
+            }
+            existing.CoverImage = "/images/books/" + fileName;
+        }
 
         await _context.SaveChangesAsync();
         TempData["Success"] = "Book updated successfully.";
