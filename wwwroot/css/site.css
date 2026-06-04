@@ -205,6 +205,10 @@ button, input, select, textarea {
   height: 34px;
   font-size: 13px;
 }
+.btn-sm.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
 
 .btn-lg {
   padding: 16px 28px;
@@ -334,6 +338,7 @@ button, input, select, textarea {
   border-radius: var(--rounded-pill);
   background-color: var(--color-surface-card);
   color: var(--color-ink);
+  white-space: nowrap;
 }
 
 .badge-primary {
@@ -412,7 +417,6 @@ button, input, select, textarea {
   padding: 8px;
   cursor: pointer;
   color: var(--color-ink);
-  margin-left: auto;
 }
 .nav-desktop-only { display: revert; }
 .nav-mobile-only { display: none; }
@@ -787,6 +791,7 @@ button, input, select, textarea {
   .nav-links.open li form button { width: 100%; text-align: left; }
   .nav-links.open .nav-mobile-only { display: block; }
   .nav-toggle { display: block; }
+  #navToggle { margin-left: auto; }
 
   .nav-desktop-only { display: none !important; }
 

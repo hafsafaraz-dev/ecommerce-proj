@@ -82,12 +82,16 @@
 
             @if (Model.TotalPages > 1)
             {
-                <div style="display: flex; justify-content: center; gap: var(--space-xs); margin-top: var(--space-xl);">
+                var prevPage = Model.Page > 1 ? Model.Page - 1 : 1;
+                var nextPage = Model.Page < Model.TotalPages ? Model.Page + 1 : Model.TotalPages;
+                var baseUrl = $"/Books?categoryId={Model.SelectedCategoryId}&search={Model.SearchTerm}&sort={Model.SortBy}";
+                <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-xs); margin-top: var(--space-xl);">
+                    <a href="@(baseUrl)&page=@prevPage" class="btn btn-sm btn-secondary @(Model.Page == 1 ? "disabled" : "")">← Prev</a>
                     @for (int p = 1; p <= Model.TotalPages; p++)
                     {
-                        <a href="/Books?page=@p&categoryId=@Model.SelectedCategoryId&search=@Model.SearchTerm&sort=@Model.SortBy"
-                           class="btn btn-sm @(p == Model.Page ? "btn-primary" : "btn-secondary")">@p</a>
+                        <a href="@(baseUrl)&page=@p" class="btn btn-sm @(p == Model.Page ? "btn-primary" : "btn-secondary")">@p</a>
                     }
+                    <a href="@(baseUrl)&page=@nextPage" class="btn btn-sm btn-secondary @(Model.Page == Model.TotalPages ? "disabled" : "")">Next →</a>
                 </div>
             }
         }

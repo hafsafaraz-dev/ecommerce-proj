@@ -41,7 +41,7 @@ public class BooksController : Controller
             _ => query.OrderByDescending(b => b.CreatedAt)
         };
 
-        int pageSize = 12;
+        int pageSize = 8;
         int totalBooks = await query.CountAsync();
         int totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
 
