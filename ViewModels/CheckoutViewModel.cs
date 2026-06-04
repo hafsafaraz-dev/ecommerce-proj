@@ -9,4 +9,7 @@ public class CheckoutViewModel
     public string ShippingAddress { get; set; } = string.Empty;
 
     public decimal TotalAmount { get; set; }
+    public string? StripePublishableKey { get; set; }
+    public string? ClientSecret { get; set; }
+    public int? OrderId { get; set; }
 }

@@ -20,8 +20,9 @@ public class DashboardController : Controller
 
     public async Task<IActionResult> Index()
     {
+        var paidStatuses = new[] { OrderStatus.Paid, OrderStatus.Processing, OrderStatus.Shipped, OrderStatus.Delivered };
         var totalRevenue = await _context.Orders
-            .Where(o => o.Status == OrderStatus.Delivered)
+            .Where(o => paidStatuses.Contains(o.Status))
             .SumAsync(o => o.TotalAmount);
 
         var viewModel = new AdminDashboardViewModel
@@ -41,9 +42,10 @@ public class DashboardController : Controller
 
     private async Task<List<MonthlySales>> GetMonthlySales()
     {
+        var paidStatuses = new[] { OrderStatus.Paid, OrderStatus.Processing, OrderStatus.Shipped, OrderStatus.Delivered };
         var sixMonthsAgo = DateTime.UtcNow.AddMonths(-6);
         var grouped = await _context.Orders
-            .Where(o => o.OrderDate >= sixMonthsAgo && o.Status == OrderStatus.Delivered)
+            .Where(o => o.OrderDate >= sixMonthsAgo && paidStatuses.Contains(o.Status))
             .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
             .Select(g => new
             {

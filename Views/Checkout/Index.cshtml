@@ -3,27 +3,140 @@
     ViewData["Title"] = "Checkout";
 }
 
+<script src="https://js.stripe.com/v3/"></script>
+
+<style>
+    .StripeElement {
+        padding: 12px 14px;
+        border: 1px solid var(--color-hairline);
+        border-radius: var(--rounded-md);
+        background: var(--color-canvas);
+    }
+    .StripeElement--focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+    }
+    .StripeElement--invalid {
+        border-color: var(--color-error);
+    }
+</style>
+
 <section class="section">
     <div class="container">
         <div style="max-width: 600px; margin: 0 auto;">
             <h1 style="margin-bottom: var(--space-lg);">Checkout</h1>
 
-            <div class="card" style="margin-bottom: var(--space-lg);">
+            <div id="order-summary" class="card" style="margin-bottom: var(--space-lg);">
                 <h5>Order Summary</h5>
                 <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-xs);">
                     <span class="text-muted">Total Amount</span>
-                    <span style="font-family: var(--font-display); font-size: 28px;">$@Model.TotalAmount.ToString("F2")</span>
+                    <span style="font-family: var(--font-display); font-size: 28px; color: var(--color-ink);">$@Model.TotalAmount.ToString("F2")</span>
                 </div>
             </div>
 
-            <form method="post" action="/Checkout/CreateSession">
-                @Html.AntiForgeryToken()
+            <div class="card" style="margin-bottom: var(--space-lg);">
+                <h5>Shipping Address</h5>
                 <div class="form-group">
-                    <label class="form-label">Shipping Address</label>
-                    <textarea name="ShippingAddress" class="form-textarea" required placeholder="Enter your full shipping address">@Model.ShippingAddress</textarea>
+                    <textarea id="shipping-address" class="form-textarea" required placeholder="Enter your full shipping address">@Model.ShippingAddress</textarea>
                 </div>
-                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Proceed to Payment (Stripe)</button>
-            </form>
+            </div>
+
+            <div class="card" style="margin-bottom: var(--space-lg);">
+                <h5>Card Details</h5>
+                <div id="card-element" style="margin-top: var(--space-sm);"></div>
+                <div id="card-errors" style="color: var(--color-error); margin-top: var(--space-xs); font-size: 14px;"></div>
+            </div>
+
+            <button id="pay-button" class="btn btn-primary btn-lg" style="width: 100%;">
+                Pay $@Model.TotalAmount.ToString("F2")
+            </button>
+            <div id="loading-message" style="text-align: center; margin-top: var(--space-sm); color: var(--color-muted); display: none;">Processing payment...</div>
         </div>
     </div>
 </section>
+
+<form id="confirm-form" method="post" action="/Checkout/ConfirmPayment" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="orderId" id="confirm-order-id" />
+    <input type="hidden" name="paymentIntentId" id="confirm-pi-id" />
+</form>
+
+<script>
+    var stripe = Stripe('@Model.StripePublishableKey');
+    var elements = stripe.elements();
+    var card = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                fontFamily: 'Inter, sans-serif',
+                color: '#141413',
+                '::placeholder': { color: '#8e8b82' }
+            }
+        }
+    });
+    card.mount('#card-element');
+
+    card.addEventListener('change', function (event) {
+        var displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    document.getElementById('pay-button').addEventListener('click', async function () {
+        var button = this;
+        var loading = document.getElementById('loading-message');
+        var errorDiv = document.getElementById('card-errors');
+
+        button.disabled = true;
+        loading.style.display = 'block';
+        errorDiv.textContent = '';
+
+        var address = document.getElementById('shipping-address').value.trim();
+        if (!address) {
+            errorDiv.textContent = 'Please enter a shipping address.';
+            button.disabled = false;
+            loading.style.display = 'none';
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('ShippingAddress', address);
+
+        try {
+            var orderResp = await fetch('/Checkout/PlaceOrder', {
+                method: 'POST',
+                body: formData,
+                headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value }
+            });
+            var orderData = await orderResp.json();
+
+            if (!orderData.success) {
+                errorDiv.textContent = orderData.error || 'Failed to create order.';
+                button.disabled = false;
+                loading.style.display = 'none';
+                return;
+            }
+
+            var result = await stripe.confirmCardPayment(orderData.clientSecret, {
+                payment_method: { card: card }
+            });
+
+            if (result.error) {
+                errorDiv.textContent = result.error.message;
+                button.disabled = false;
+                loading.style.display = 'none';
+            } else {
+                document.getElementById('confirm-order-id').value = orderData.orderId;
+                document.getElementById('confirm-pi-id').value = result.paymentIntent.id;
+                document.getElementById('confirm-form').submit();
+            }
+        } catch (e) {
+            errorDiv.textContent = 'An unexpected error occurred. Please try again.';
+            button.disabled = false;
+            loading.style.display = 'none';
+        }
+    });
+</script>

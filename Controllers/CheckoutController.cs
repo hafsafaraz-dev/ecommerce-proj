@@ -4,6 +4,7 @@ using BookBazaar.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 namespace BookBazaar.Controllers;
 
@@ -34,7 +35,8 @@ public class CheckoutController : Controller
 
         var viewModel = new CheckoutViewModel
         {
-            TotalAmount = cartItems.Sum(c => c.Book.Price * c.Quantity)
+            TotalAmount = cartItems.Sum(c => c.Book.Price * c.Quantity),
+            StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? ""
         };
 
         return View(viewModel);
@@ -42,12 +44,11 @@ public class CheckoutController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateSession(CheckoutViewModel model)
+    public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
     {
         var userId = _context.Users.Where(u => u.UserName == User.Identity!.Name).Select(u => u.Id).FirstOrDefault();
         if (userId == null) return Challenge();
 
-        var user = await _context.Users.FindAsync(userId);
         var cartItems = await _context.CartItems
             .Include(c => c.Book)
             .Where(c => c.UserId == userId)
@@ -56,8 +57,15 @@ public class CheckoutController : Controller
         if (!cartItems.Any())
             return RedirectToAction("Index", "Cart");
 
+        if (string.IsNullOrWhiteSpace(model.ShippingAddress))
+        {
+            ModelState.AddModelError("", "Shipping address is required.");
+            return Json(new { success = false, error = "Shipping address is required." });
+        }
+
         var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..4].ToUpper()}";
         var totalAmount = cartItems.Sum(c => c.Book.Price * c.Quantity);
+        var totalCents = (long)(totalAmount * 100);
 
         var order = new Order
         {
@@ -80,88 +88,79 @@ public class CheckoutController : Controller
                 Quantity = item.Quantity,
                 UnitPrice = item.Book.Price
             });
-
             item.Book.StockQuantity -= item.Quantity;
         }
 
         _context.CartItems.RemoveRange(cartItems);
         await _context.SaveChangesAsync();
 
-        var lineItems = cartItems.Select(item => new Stripe.Checkout.SessionLineItemOptions
-        {
-            PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
-            {
-                Currency = "usd",
-                ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
-                {
-                    Name = item.Book.Title,
-                },
-                UnitAmount = (long)(item.Book.Price * 100),
-            },
-            Quantity = item.Quantity,
-        }).ToList();
+        StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
 
-        var options = new Stripe.Checkout.SessionCreateOptions
+        var paymentIntentService = new PaymentIntentService();
+        var paymentIntent = await paymentIntentService.CreateAsync(new PaymentIntentCreateOptions
         {
-            PaymentMethodTypes = ["card"],
-            LineItems = lineItems,
-            Mode = "payment",
-            SuccessUrl = $"{Request.Scheme}://{Request.Host}/Checkout/Success?session_id={{CHECKOUT_SESSION_ID}}&order_id={order.Id}",
-            CancelUrl = $"{Request.Scheme}://{Request.Host}/Checkout/Cancel?order_id={order.Id}",
+            Amount = totalCents,
+            Currency = "usd",
             Metadata = new Dictionary<string, string>
             {
                 { "order_id", order.Id.ToString() }
             }
-        };
-
-        var service = new Stripe.Checkout.SessionService();
-        var session = await service.CreateAsync(options);
+        });
 
         _context.Payments.Add(new Payment
         {
             OrderId = order.Id,
-            StripeSessionId = session.Id,
+            StripeSessionId = paymentIntent.Id,
             Amount = totalAmount,
             Status = "pending"
         });
-
-        order.Status = OrderStatus.Paid;
         await _context.SaveChangesAsync();
 
-        return Redirect(session.Url);
+        return Json(new { success = true, clientSecret = paymentIntent.ClientSecret, orderId = order.Id });
     }
 
-    public async Task<IActionResult> Success(string session_id, int order_id)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmPayment(int orderId, string paymentIntentId)
     {
         var order = await _context.Orders
             .Include(o => o.Payment)
-            .FirstOrDefaultAsync(o => o.Id == order_id);
+            .FirstOrDefaultAsync(o => o.Id == orderId);
 
         if (order == null) return NotFound();
 
-        try
-        {
-            var service = new Stripe.Checkout.SessionService();
-            var session = await service.GetAsync(session_id);
+        StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
+        var service = new PaymentIntentService();
+        var intent = await service.GetAsync(paymentIntentId);
 
-            if (session.PaymentStatus == "paid" && order.Payment != null)
-            {
-                order.Payment.StripePaymentIntentId = session.PaymentIntentId;
-                order.Payment.Status = "completed";
-                order.Status = OrderStatus.Processing;
-                await _context.SaveChangesAsync();
-            }
-        }
-        catch
+        if (intent.Status == "succeeded" && order.Payment != null)
         {
+            order.Payment.StripePaymentIntentId = paymentIntentId;
+            order.Payment.Status = "completed";
+            order.Status = OrderStatus.Processing;
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Success), new { orderId });
         }
 
+        order.Status = OrderStatus.Cancelled;
+        await _context.SaveChangesAsync();
+        TempData["Error"] = "Payment was not successful.";
+        return RedirectToAction("Index", "Cart");
+    }
+
+    public async Task<IActionResult> Success(int orderId)
+    {
+        var order = await _context.Orders
+            .Include(o => o.Payment)
+            .FirstOrDefaultAsync(o => o.Id == orderId);
+
+        if (order == null) return NotFound();
         return View(order);
     }
 
-    public async Task<IActionResult> Cancel(int order_id)
+    public async Task<IActionResult> Cancel(int orderId)
     {
-        var order = await _context.Orders.FindAsync(order_id);
+        var order = await _context.Orders.FindAsync(orderId);
         if (order != null)
         {
             order.Status = OrderStatus.Cancelled;
