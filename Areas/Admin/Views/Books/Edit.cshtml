@@ -47,13 +47,17 @@
         </select>
     </div>
     <div class="form-group">
-        <label class="form-label">Cover Image</label>
+        <label class="form-label">Cover Image (upload file)</label>
         <input type="file" name="CoverImageFile" class="form-input" accept="image/*" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Or paste image URL</label>
+        <input type="url" name="CoverImageUrl" class="form-input" placeholder="https://example.com/book-cover.jpg" value="@(!string.IsNullOrEmpty(Model.CoverImage) && !Model.CoverImage.StartsWith("/images/") ? Model.CoverImage : "")" />
         @if (!string.IsNullOrEmpty(Model.CoverImage))
         {
             <div style="margin-top: var(--space-xs);">
                 <img src="@Model.CoverImage" alt="Current cover" style="max-height: 120px; border-radius: var(--rounded-md);" />
-                <p style="font-size: 12px; color: var(--color-muted); margin-top: 4px;">Current image. Upload a new one to replace.</p>
+                <p style="font-size: 12px; color: var(--color-muted); margin-top: 4px;">Current image. Upload or paste a URL to replace.</p>
             </div>
         }
     </div>

@@ -483,6 +483,31 @@ button, input, select, textarea {
   color: var(--color-muted);
   font-size: 14px;
   overflow: hidden;
+  position: relative;
+}
+.book-card-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.book-cover {
+  background: var(--color-surface-cream-strong);
+  border-radius: var(--rounded-lg);
+  aspect-ratio: 3/4;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.book-cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .book-card-body {
   padding: var(--space-md);

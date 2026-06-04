@@ -40,7 +40,7 @@ public class BooksController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Book book, IFormFile? CoverImageFile)
+    public async Task<IActionResult> Create(Book book, IFormFile? CoverImageFile, string? CoverImageUrl)
     {
         if (CoverImageFile != null && CoverImageFile.Length > 0)
         {
@@ -51,6 +51,10 @@ public class BooksController : Controller
                 await CoverImageFile.CopyToAsync(stream);
             }
             book.CoverImage = "/images/books/" + fileName;
+        }
+        else if (!string.IsNullOrWhiteSpace(CoverImageUrl))
+        {
+            book.CoverImage = CoverImageUrl;
         }
         book.CreatedAt = DateTime.UtcNow;
         book.UpdatedAt = DateTime.UtcNow;
@@ -70,7 +74,7 @@ public class BooksController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Book book, IFormFile? CoverImageFile)
+    public async Task<IActionResult> Edit(int id, Book book, IFormFile? CoverImageFile, string? CoverImageUrl)
     {
         var existing = await _context.Books.FindAsync(id);
         if (existing == null) return NotFound();
@@ -94,6 +98,10 @@ public class BooksController : Controller
                 await CoverImageFile.CopyToAsync(stream);
             }
             existing.CoverImage = "/images/books/" + fileName;
+        }
+        else if (!string.IsNullOrWhiteSpace(CoverImageUrl))
+        {
+            existing.CoverImage = CoverImageUrl;
         }
 
         await _context.SaveChangesAsync();
