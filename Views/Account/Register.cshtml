@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Register";
+}
+
+<section class="section">
+    <div class="container" style="max-width: 440px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: var(--space-xl);">
+            <h1>Create Account</h1>
+            <p class="text-muted">Join BookBazaar today</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div style="background: var(--color-error); color: white; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-md); margin-bottom: var(--space-md);">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <div class="card">
+            <form method="post" action="/Account/Register">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="fullName" class="form-input" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-input" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-input" required minlength="6" />
+                    <span style="font-size: 12px; color: var(--color-muted);">Minimum 6 characters</span>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+            </form>
+        </div>
+
+        <p style="text-align: center; margin-top: var(--space-md); font-size: 14px;">
+            Already have an account? <a href="/Account/Login">Sign in</a>
+        </p>
+    </div>
+</section>

@@ -1,0 +1,53 @@
+@model ApplicationUser
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<a href="/Admin/Users" class="btn btn-text" style="margin-bottom: var(--space-md);">← Back to Users</a>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <h5>User Information</h5>
+            <div style="display: grid; grid-template-columns: 120px 1fr; gap: var(--space-sm); font-size: 14px;">
+                <span class="text-muted">Name:</span>
+                <span>@(Model.FullName ?? "N/A")</span>
+                <span class="text-muted">Email:</span>
+                <span>@Model.Email</span>
+                <span class="text-muted">Phone:</span>
+                <span>@(Model.PhoneNumber ?? "N/A")</span>
+                <span class="text-muted">Status:</span>
+                <span>@(Model.IsSuspended ? "Suspended" : "Active")</span>
+                <span class="text-muted">Registered:</span>
+                <span>@Model.CreatedAt.ToString("MMM dd, yyyy")</span>
+            </div>
+            <form method="post" action="/Admin/Users/ToggleSuspend" style="margin-top: var(--space-md);">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn @(Model.IsSuspended ? "btn-primary" : "btn-danger")">
+                    @(Model.IsSuspended ? "Reactivate User" : "Suspend User")
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <h5>Order History (@Model.Orders.Count)</h5>
+            @if (!Model.Orders.Any())
+            {
+                <p class="text-muted">No orders.</p>
+            }
+            else
+            {
+                @foreach (var order in Model.Orders.OrderByDescending(o => o.OrderDate).Take(10))
+                {
+                    <div style="display: flex; justify-content: space-between; padding: var(--space-xs) 0; border-bottom: 1px solid var(--color-hairline-soft); font-size: 14px;">
+                        <span style="font-weight: 500;">@order.OrderNumber</span>
+                        <span>$@order.TotalAmount.ToString("F2")</span>
+                        <span class="badge badge-sm @(order.Status == OrderStatus.Delivered ? "badge-success" : "badge-warning")">@order.Status</span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

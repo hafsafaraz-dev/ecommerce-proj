@@ -1,0 +1,56 @@
+@model List<Book>
+@{
+    ViewData["Title"] = "Manage Books";
+}
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-lg);">
+    <h2>Books</h2>
+    <a href="/Admin/Books/Create" class="btn btn-primary">Add New Book</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Featured</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in Model)
+            {
+                <tr>
+                    <td><span style="font-weight: 500;">@book.Title</span></td>
+                    <td>@book.Author</td>
+                    <td>@book.Category?.Name</td>
+                    <td>$@book.Price.ToString("F2")</td>
+                    <td>@book.StockQuantity</td>
+                    <td>@(book.IsFeatured ? "⭐" : "")</td>
+                    <td>
+                        <a href="/Admin/Books/Edit/@book.Id" class="btn btn-text btn-sm">Edit</a>
+                        <form method="post" action="/Admin/Books/Delete" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@book.Id" />
+                            <button type="submit" class="btn btn-text btn-sm" style="color: var(--color-error);" onclick="return confirm('Delete this book?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+    <div style="display: flex; gap: var(--space-xs); margin-top: var(--space-md);">
+        @for (int p = 1; p <= ViewBag.TotalPages; p++)
+        {
+            <a href="/Admin/Books?page=@p" class="btn btn-sm @(p == ViewBag.Page ? "btn-primary" : "btn-secondary")">@p</a>
+        }
+    </div>
+}

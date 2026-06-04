@@ -1,0 +1,29 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+*.vsidx
+[Dd]ebug/
+[Rr]elease/
+
+## Visual Studio
+.vs/
+*.sln.ide/
+*.sln.docstates
+
+## IDE
+.idea/
+*.swp
+*~
+
+## Project files
+MVP.txt
+design.txt
+appsettings.Development.json
+
+## OS
+.DS_Store
+Thumbs.db

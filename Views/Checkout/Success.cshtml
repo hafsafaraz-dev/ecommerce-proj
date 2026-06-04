@@ -1,0 +1,30 @@
+@model Order
+@{
+    ViewData["Title"] = "Order Successful";
+}
+
+<section class="section">
+    <div class="container" style="text-align: center; max-width: 600px; margin: 0 auto;">
+        <div style="font-size: 80px; margin-bottom: var(--space-md);">✅</div>
+        <h1>Payment Successful!</h1>
+        <p class="text-muted" style="font-size: 18px; margin-bottom: var(--space-lg);">Thank you for your order. Your payment has been confirmed.</p>
+
+        <div class="card" style="text-align: left; margin-bottom: var(--space-lg);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                <span class="text-muted">Order Number</span>
+                <span style="font-weight: 500;">@Model.OrderNumber</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                <span class="text-muted">Total Paid</span>
+                <span style="font-weight: 500;">$@Model.TotalAmount.ToString("F2")</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span class="text-muted">Status</span>
+                <span class="badge badge-success">@Model.Status</span>
+            </div>
+        </div>
+
+        <a href="/Orders/Details/@Model.Id" class="btn btn-primary btn-lg">View Order Details</a>
+        <a href="/Books" class="btn btn-secondary btn-lg" style="margin-left: var(--space-xs);">Continue Shopping</a>
+    </div>
+</section>

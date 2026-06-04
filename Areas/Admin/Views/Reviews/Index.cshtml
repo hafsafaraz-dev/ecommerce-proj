@@ -1,0 +1,63 @@
+@model List<Review>
+@{
+    ViewData["Title"] = "Manage Reviews";
+}
+
+<h2>Reviews</h2>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Book</th>
+                <th>User</th>
+                <th>Rating</th>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var review in Model)
+            {
+                <tr style="@(review.IsHidden ? "opacity: 0.5;" : "")">
+                    <td><span style="font-weight: 500;">@(review.Book?.Title ?? "Unknown")</span></td>
+                    <td>@(review.User?.FullName ?? review.User?.UserName ?? "Unknown")</td>
+                    <td>
+                        <div class="star-rating" style="font-size: 14px;">
+                            @for (int s = 1; s <= 5; s++)
+                            {
+                                <span class="@(s <= review.Rating ? "" : "star-empty")">★</span>
+                            }
+                        </div>
+                    </td>
+                    <td>@review.Title</td>
+                    <td>@review.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        @if (review.IsHidden)
+                        {
+                            <span class="badge badge-error">Hidden</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-success">Visible</span>
+                        }
+                    </td>
+                    <td>
+                        <form method="post" action="/Admin/Reviews/ToggleHide" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@review.Id" />
+                            <button type="submit" class="btn btn-text btn-sm">@(review.IsHidden ? "Show" : "Hide")</button>
+                        </form>
+                        <form method="post" action="/Admin/Reviews/Delete" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@review.Id" />
+                            <button type="submit" class="btn btn-text btn-sm" style="color: var(--color-error);" onclick="return confirm('Delete this review?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,85 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2>Dashboard</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-card-value">$@Model.TotalRevenue.ToString("F0")</div>
+            <div class="stat-card-label">Total Revenue</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-card-value">@Model.TotalBooks</div>
+            <div class="stat-card-label">Total Books</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-card-value">@Model.TotalOrders</div>
+            <div class="stat-card-label">Total Orders</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-card-value">@Model.TotalCustomers</div>
+            <div class="stat-card-label">Total Customers</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-card-value">@Model.TotalReviews</div>
+            <div class="stat-card-label">Total Reviews</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-card-value">@Model.PendingOrders</div>
+            <div class="stat-card-label">Pending Orders</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-card-value">@Model.DeliveredOrders</div>
+            <div class="stat-card-label">Delivered Orders</div>
+        </div>
+    </div>
+</div>
+
+@if (Model.MonthlySales.Any())
+{
+    <div class="card">
+        <h5>Monthly Sales (Last 6 Months)</h5>
+        <canvas id="salesChart" height="200"></canvas>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('salesChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.MonthlySales.Select(m => $"'{m.Month}'")))],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [@string.Join(",", Model.MonthlySales.Select(m => m.Revenue))],
+                        backgroundColor: '#cc785c',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+}

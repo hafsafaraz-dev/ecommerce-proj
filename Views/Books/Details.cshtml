@@ -1,0 +1,225 @@
+@model BookDetailViewModel
+@{
+    ViewData["Title"] = Model.Book.Title;
+}
+
+<section class="section">
+    <div class="container">
+        <a href="/Books" class="btn btn-text" style="margin-bottom: var(--space-md);">← Back to Books</a>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="card" style="background: var(--color-success); color: white; padding: var(--space-md); margin-bottom: var(--space-md); border-radius: var(--rounded-md);">
+                @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="card" style="background: var(--color-error); color: white; padding: var(--space-md); margin-bottom: var(--space-md); border-radius: var(--rounded-md);">
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div style="background: var(--color-surface-cream-strong); border-radius: var(--rounded-lg); aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; font-size: 80px;">
+                    📖
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div style="margin-bottom: var(--space-xs);">
+                    <span class="badge">@Model.Book.Category?.Name</span>
+                    @if (Model.Book.IsFeatured)
+                    {
+                        <span class="badge badge-primary">Featured</span>
+                    }
+                </div>
+                <h1>@Model.Book.Title</h1>
+                <p style="font-size: 18px; color: var(--color-muted);">by @Model.Book.Author</p>
+
+                <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+                    <div class="star-rating" style="font-size: 22px;">
+                        @for (int s = 1; s <= 5; s++)
+                        {
+                            <span class="@(s <= Math.Round(Model.Book.AverageRating) ? "" : "star-empty")">★</span>
+                        }
+                    </div>
+                    <span class="body-md" style="color: var(--color-muted);">@Model.Book.AverageRating.ToString("F1") (@Model.Book.ReviewsCount reviews)</span>
+                </div>
+
+                <div class="card" style="margin-bottom: var(--space-lg);">
+                    <p class="body-md" style="margin: 0;">@Model.Book.Description</p>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: var(--space-lg); flex-wrap: wrap; margin-bottom: var(--space-lg);">
+                    <div>
+                        <div class="book-card-price" style="font-size: 36px;">$@Model.Book.Price.ToString("F2")</div>
+                        @if (Model.Book.StockQuantity > 0)
+                        {
+                            <span style="font-size: 14px; color: var(--color-success);">In Stock (@Model.Book.StockQuantity available)</span>
+                        }
+                        else
+                        {
+                            <span style="font-size: 14px; color: var(--color-error);">Out of Stock</span>
+                        }
+                    </div>
+                    <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                        @if (Model.Book.StockQuantity > 0)
+                        {
+                            <form method="post" action="/Cart/Add">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="bookId" value="@Model.Book.Id" />
+                                <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+                            </form>
+                        }
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            if (!Model.IsInWishlist)
+                            {
+                                <form method="post" action="/Wishlist/Add">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="bookId" value="@Model.Book.Id" />
+                                    <button type="submit" class="btn btn-secondary btn-lg">♡ Wishlist</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="btn btn-secondary btn-lg" style="opacity: 0.7; cursor: default;">♥ In Wishlist</span>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-surface-soft">
+    <div class="container">
+        <h2>Rating Breakdown</h2>
+        @{
+            var totalStars = Model.StarDistribution1 + Model.StarDistribution2 + Model.StarDistribution3 + Model.StarDistribution4 + Model.StarDistribution5;
+            totalStars = totalStars > 0 ? totalStars : 1;
+        }
+        @for (int s = 5; s >= 1; s--)
+        {
+            var count = s switch { 5 => Model.StarDistribution5, 4 => Model.StarDistribution4, 3 => Model.StarDistribution3, 2 => Model.StarDistribution2, _ => Model.StarDistribution1 };
+            var pct = (count * 100.0) / totalStars;
+            <div style="display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-xs);">
+                <span style="font-size: 14px; min-width: 40px;">@s ★</span>
+                <div class="progress-bar-container" style="flex: 1;">
+                    <div class="progress-bar-fill" style="width: @(pct)%"></div>
+                </div>
+                <span style="font-size: 13px; color: var(--color-muted); min-width: 30px;">@count</span>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-lg);">
+            <h2>Reviews</h2>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                if (!Model.HasUserReviewed)
+                {
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('reviewForm').style.display='block'">Write a Review</button>
+                }
+            }
+            else
+            {
+                <a href="/Account/Login?returnUrl=/Books/Details/@Model.Book.Id" class="btn btn-primary">Sign in to Review</a>
+            }
+        </div>
+
+        @if (SignInManager.IsSignedIn(User) && !Model.HasUserReviewed)
+        {
+            <div id="reviewForm" class="card" style="margin-bottom: var(--space-lg); display: none;">
+                <h4>Write a Review</h4>
+                <form method="post" action="/Reviews/Create">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="bookId" value="@Model.Book.Id" />
+                    <div class="form-group">
+                        <label class="form-label">Rating</label>
+                        <div style="display: flex; gap: var(--space-xs); font-size: 28px;">
+                            @for (int s = 1; s <= 5; s++)
+                            {
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="rating" value="@s" style="display: none;" onchange="updateStars(this)" />
+                                    <span class="star-select" data-value="@s" style="color: var(--color-hairline);">★</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Review Title</label>
+                        <input type="text" name="title" class="form-input" required maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Comment</label>
+                        <textarea name="comment" class="form-textarea" maxlength="2000"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </form>
+            </div>
+        }
+
+        @if (!Model.Reviews.Any())
+        {
+            <div style="text-align: center; padding: var(--space-xl) 0; color: var(--color-muted);">
+                <p>No reviews yet. Be the first to review!</p>
+            </div>
+        }
+        else
+        {
+            foreach (var review in Model.Reviews)
+            {
+                <div class="review-card">
+                    <div class="review-card-header">
+                        <div>
+                            <span class="review-card-user">@(review.User?.FullName ?? review.User?.UserName ?? "Unknown")</span>
+                            <div class="star-rating" style="font-size: 14px; margin-top: 2px;">
+                                @for (int s = 1; s <= 5; s++)
+                                {
+                                    <span class="@(s <= review.Rating ? "" : "star-empty")">★</span>
+                                }
+                            </div>
+                        </div>
+                        <span class="review-card-date">@review.CreatedAt.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <h5 style="margin: var(--space-xs) 0;">@review.Title</h5>
+                    <p style="margin: 0; font-size: 15px;">@review.Comment</p>
+                    @if (SignInManager.IsSignedIn(User) && review.User?.UserName == User.Identity?.Name)
+                    {
+                        <div style="margin-top: var(--space-sm); display: flex; gap: var(--space-xs);">
+                            <form method="post" action="/Reviews/Delete/@review.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-text btn-sm" style="color: var(--color-error);">Delete</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function updateStars(radio) {
+            var val = parseInt(radio.value);
+            var labels = document.querySelectorAll('.star-select');
+            labels.forEach(function(l, i) {
+                l.style.color = (i < val) ? 'var(--color-accent-amber)' : 'var(--color-hairline)';
+            });
+        }
+        document.querySelectorAll('.star-select').forEach(function(s) {
+            s.addEventListener('click', function() {
+                var radio = this.previousElementSibling;
+                if (radio) radio.checked = true;
+                updateStars(radio);
+            });
+        });
+    </script>
+}

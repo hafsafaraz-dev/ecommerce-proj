@@ -1,0 +1,112 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<section class="section">
+    <div class="container" style="max-width: 800px; margin: 0 auto;">
+        <h1 style="margin-bottom: var(--space-lg);">My Profile</h1>
+
+        @if (TempData["Success"] != null)
+        {
+            <div style="background: var(--color-success); color: white; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-md); margin-bottom: var(--space-md);">
+                @TempData["Success"]
+            </div>
+        }
+
+        <div class="card" style="margin-bottom: var(--space-lg);">
+            <h5>Account Information</h5>
+            <form method="post" action="/Account/UpdateProfile">
+                @Html.AntiForgeryToken()
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="FullName" class="form-input" value="@Model.FullName" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" value="@Model.Email" readonly disabled style="opacity: 0.7;" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" name="PhoneNumber" class="form-input" value="@Model.PhoneNumber" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" name="DateOfBirth" class="form-input" value="@Model.DateOfBirth?.ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <textarea name="Address" class="form-textarea">@Model.Address</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="/Account/ChangePassword" class="btn btn-secondary" style="margin-left: var(--space-xs);">Change Password</a>
+            </form>
+        </div>
+
+        <div class="card" style="margin-bottom: var(--space-lg);">
+            <h5>Recent Orders</h5>
+            @if (!Model.RecentOrders.Any())
+            {
+                <p class="text-muted">No orders yet.</p>
+            }
+            else
+            {
+                @foreach (var order in Model.RecentOrders)
+                {
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--color-hairline-soft);">
+                        <div>
+                            <div style="font-weight: 500;">@order.OrderNumber</div>
+                            <div style="font-size: 13px; color: var(--color-muted);">@order.OrderDate.ToString("MMM dd, yyyy")</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <span class="badge @(order.Status == OrderStatus.Delivered ? "badge-success" : order.Status == OrderStatus.Cancelled ? "badge-error" : "badge-warning")">@order.Status</span>
+                            <a href="/Orders/Details/@order.Id" class="btn btn-text btn-sm">View</a>
+                        </div>
+                    </div>
+                }
+                <a href="/Orders" style="display: block; margin-top: var(--space-sm); font-size: 14px;">View all orders →</a>
+            }
+        </div>
+
+        <div class="card">
+            <h5>Recent Reviews</h5>
+            @if (!Model.RecentReviews.Any())
+            {
+                <p class="text-muted">No reviews yet.</p>
+            }
+            else
+            {
+                @foreach (var review in Model.RecentReviews)
+                {
+                    <div style="padding: var(--space-sm) 0; border-bottom: 1px solid var(--color-hairline-soft);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <a href="/Books/Details/@review.BookId" style="font-weight: 500;">@review.Book?.Title</a>
+                                <div class="star-rating" style="font-size: 13px;">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        <span class="@(s <= review.Rating ? "" : "star-empty")">★</span>
+                                    }
+                                </div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--color-muted);">@review.CreatedAt.ToString("MMM dd, yyyy")</div>
+                        </div>
+                        <div style="font-size: 14px; margin-top: 4px;">@review.Comment</div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>

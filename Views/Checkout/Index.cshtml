@@ -1,0 +1,29 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<section class="section">
+    <div class="container">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <h1 style="margin-bottom: var(--space-lg);">Checkout</h1>
+
+            <div class="card" style="margin-bottom: var(--space-lg);">
+                <h5>Order Summary</h5>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-xs);">
+                    <span class="text-muted">Total Amount</span>
+                    <span style="font-family: var(--font-display); font-size: 28px;">$@Model.TotalAmount.ToString("F2")</span>
+                </div>
+            </div>
+
+            <form method="post" action="/Checkout/CreateSession">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label class="form-label">Shipping Address</label>
+                    <textarea name="ShippingAddress" class="form-textarea" required placeholder="Enter your full shipping address">@Model.ShippingAddress</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Proceed to Payment (Stripe)</button>
+            </form>
+        </div>
+    </div>
+</section>

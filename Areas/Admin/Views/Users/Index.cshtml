@@ -1,0 +1,41 @@
+@model List<ApplicationUser>
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<h2>Users</h2>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Registered</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td><span style="font-weight: 500;">@(user.FullName ?? "N/A")</span></td>
+                    <td>@user.Email</td>
+                    <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        @if (user.IsSuspended)
+                        {
+                            <span class="badge badge-error">Suspended</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-success">Active</span>
+                        }
+                    </td>
+                    <td><a href="/Admin/Users/Details/@user.Id" class="btn btn-text btn-sm">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

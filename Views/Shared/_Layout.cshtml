@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BookBazaar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BookBazaar.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="nav-brand">BookBazaar</a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+            <ul class="nav-links" id="navDrawer">
+                <li><a href="/">Home</a></li>
+                <li><a href="/Books">Books</a></li>
+                <li class="nav-mobile-only"><a href="/Cart">Cart</a></li>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-mobile-only"><a href="/Admin/Dashboard">Admin</a></li>
+                    }
+                    <li class="nav-mobile-only"><a href="/Account/Profile">Profile</a></li>
+                    <li class="nav-mobile-only">
+                        <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-text" style="width:100%; text-align:left;">Logout</button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-mobile-only"><a href="/Account/Login">Sign in</a></li>
+                    <li class="nav-mobile-only"><a href="/Account/Register">Register</a></li>
+                }
+            </ul>
+            <div class="nav-right nav-desktop-only">
+                <a href="/Cart" class="btn btn-text">Cart</a>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="/Admin/Dashboard" class="btn btn-text">Admin</a>
+                    }
+                    <a href="/Account/Profile" class="btn btn-text">Profile</a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-text">Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/Account/Login" class="btn btn-text">Sign in</a>
+                    <a href="/Account/Register" class="btn btn-primary btn-sm">Register</a>
+                }
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h5>BookBazaar</h5>
+                    <a href="/">Home</a>
+                    <a href="/Books">Browse Books</a>
+                </div>
+                <div>
+                    <h5>Support</h5>
+                    <a href="/Home/Privacy">Privacy Policy</a>
+                    <a href="/Home/Terms">Terms of Service</a>
+                </div>
+                <div>
+                    <h5>Account</h5>
+                    <a href="/Account/Login">Sign In</a>
+                    <a href="/Account/Register">Register</a>
+                </div>
+                <div>
+                    <h5>Contact</h5>
+                    <p style="font-size:14px; margin:0;">support@bookbazaar.com</p>
+                </div>
+            </div>
+            <div style="margin-top: var(--space-xl); padding-top: var(--space-md); border-top: 1px solid var(--color-surface-dark-elevated); font-size: 14px;">
+                &copy; 2026 BookBazaar. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

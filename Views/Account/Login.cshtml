@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Sign In";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<section class="section">
+    <div class="container" style="max-width: 440px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: var(--space-xl);">
+            <h1>Welcome Back</h1>
+            <p class="text-muted">Sign in to your BookBazaar account</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div style="background: var(--color-error); color: white; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-md); margin-bottom: var(--space-md);">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <div class="card">
+            <form method="post" action="/Account/Login">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-input" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-input" required />
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+            </form>
+        </div>
+
+        <p style="text-align: center; margin-top: var(--space-md); font-size: 14px;">
+            Don't have an account? <a href="/Account/Register">Register here</a>
+        </p>
+    </div>
+</section>

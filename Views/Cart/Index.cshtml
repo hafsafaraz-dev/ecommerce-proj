@@ -1,0 +1,89 @@
+@model CartViewModel
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<section class="section">
+    <div class="container">
+        <h1 style="margin-bottom: var(--space-lg);">Shopping Cart</h1>
+
+        @if (!Model.Items.Any())
+        {
+            <div style="text-align: center; padding: var(--space-xxl) 0;">
+                <div style="font-size: 80px; margin-bottom: var(--space-md);">🛒</div>
+                <h3>Your cart is empty</h3>
+                <p class="text-muted" style="margin-bottom: var(--space-lg);">Add some books to get started!</p>
+                <a href="/Books" class="btn btn-primary btn-lg">Browse Books</a>
+            </div>
+        }
+        else
+        {
+            <div style="display: flex; gap: var(--space-xl); flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="cart-item">
+                            <div class="cart-item-img">
+                                <span>📖</span>
+                            </div>
+                            <div class="cart-item-info">
+                                <div class="cart-item-title">@item.Book.Title</div>
+                                <div class="cart-item-author">@item.Book.Author</div>
+                                <div class="cart-item-price" style="margin-top: var(--space-xs);">$@((item.Book.Price * item.Quantity).ToString("F2"))</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                                <form method="post" action="/Cart/Update" style="display: flex; align-items: center;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <div class="qty-control">
+                                        <button type="submit" name="quantity" value="@(item.Quantity - 1)" class="qty-btn" @(item.Quantity <= 1 ? "disabled" : "")>−</button>
+                                        <span class="qty-input" style="display: flex; align-items: center; justify-content: center; line-height: 1;">@item.Quantity</span>
+                                        <button type="submit" name="quantity" value="@(item.Quantity + 1)" class="qty-btn">+</button>
+                                    </div>
+                                </form>
+                                <form method="post" action="/Cart/Remove">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-text btn-sm" style="color: var(--color-error);">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+
+                    <form method="post" action="/Cart/Clear" style="margin-top: var(--space-md);">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-text btn-sm" style="color: var(--color-error);">Clear Cart</button>
+                    </form>
+                </div>
+
+                <div style="width: 320px;">
+                    <div class="card">
+                        <h5 style="margin-bottom: var(--space-md);">Order Summary</h5>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                            <span class="text-muted">Subtotal (@Model.ItemCount items)</span>
+                            <span style="font-weight: 500;">$@Model.Total.ToString("F2")</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                            <span class="text-muted">Shipping</span>
+                            <span style="font-weight: 500;">Free</span>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid var(--color-hairline); margin: var(--space-md) 0;" />
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-lg);">
+                            <span style="font-weight: 500;">Total</span>
+                            <span style="font-family: var(--font-display); font-size: 24px; font-weight: 400;">$@Model.Total.ToString("F2")</span>
+                        </div>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <a href="/Checkout" class="btn btn-primary" style="width: 100%;">Proceed to Checkout</a>
+                        }
+                        else
+                        {
+                            <a href="/Account/Login?returnUrl=/Cart" class="btn btn-primary" style="width: 100%;">Sign in to Checkout</a>
+                        }
+                        <a href="/Books" class="btn btn-secondary" style="width: 100%; margin-top: var(--space-xs);">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

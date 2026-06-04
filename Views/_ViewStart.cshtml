@@ -1,0 +1,7 @@
+﻿@{
+    var area = ViewContext.RouteData.Values["area"]?.ToString();
+    if (string.IsNullOrEmpty(area))
+    {
+        Layout = "_Layout";
+    }
+}

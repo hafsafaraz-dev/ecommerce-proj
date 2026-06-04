@@ -1,0 +1,88 @@
+@model BookListViewModel
+@{
+    ViewData["Title"] = "Browse Books";
+}
+
+<section class="section">
+    <div class="container">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-md); margin-bottom: var(--space-lg);">
+            <h1 style="margin: 0;">Books</h1>
+            <form method="get" action="/Books" style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                <input type="text" name="search" class="form-input" style="width: 220px;" placeholder="Search by title, author..." value="@Model.SearchTerm" />
+                <select name="sort" class="form-select" style="width: 160px;" onchange="this.form.submit()">
+                    <option value="">Newest</option>
+                    <option value="price_asc" selected="@(Model.SortBy == "price_asc")">Price: Low to High</option>
+                    <option value="price_desc" selected="@(Model.SortBy == "price_desc")">Price: High to Low</option>
+                    <option value="rating" selected="@(Model.SortBy == "rating")">Top Rated</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                {
+                    <a href="/Books" class="btn btn-secondary">Clear</a>
+                }
+            </form>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-xl);">
+            <a href="/Books" class="category-tab @(!Model.SelectedCategoryId.HasValue ? "active" : "")">All</a>
+            @foreach (var cat in Model.Categories)
+            {
+                <a href="/Books?categoryId=@cat.Id" class="category-tab @(Model.SelectedCategoryId == cat.Id ? "active" : "")">@cat.Name</a>
+            }
+        </div>
+
+        @if (!Model.Books.Any())
+        {
+            <div style="text-align: center; padding: var(--space-xxl) 0;">
+                <h3>No books found</h3>
+                <p class="text-muted">Try adjusting your search or filters.</p>
+            </div>
+        }
+        else
+        {
+            <div class="book-grid">
+                @foreach (var book in Model.Books)
+                {
+                    <div class="book-card">
+                        <a href="/Books/Details/@book.Id" style="text-decoration: none; color: inherit;">
+                            <div class="book-card-img">
+                                <span>📖</span>
+                            </div>
+                            <div class="book-card-body">
+                                <h3 class="book-card-title">@book.Title</h3>
+                                <p class="book-card-author">@book.Author</p>
+                                <div style="font-size: 12px; color: var(--color-muted-soft); margin-bottom: var(--space-xs);">@book.Category?.Name</div>
+                                <div class="book-card-price">$@book.Price.ToString("F2")</div>
+                                <div class="star-rating" style="margin-top: 4px;">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        <span class="@(s <= Math.Round(book.AverageRating) ? "" : "star-empty")">★</span>
+                                    }
+                                    <span style="font-size: 12px; color: var(--color-muted); margin-left: 4px;">(@book.ReviewsCount)</span>
+                                </div>
+                            </div>
+                            <div class="book-card-footer">
+                                <form method="post" action="/Cart/Add">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="bookId" value="@book.Id" />
+                                    <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">Add to Cart</button>
+                                </form>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div style="display: flex; justify-content: center; gap: var(--space-xs); margin-top: var(--space-xl);">
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <a href="/Books?page=@p&categoryId=@Model.SelectedCategoryId&search=@Model.SearchTerm&sort=@Model.SortBy"
+                           class="btn btn-sm @(p == Model.Page ? "btn-primary" : "btn-secondary")">@p</a>
+                    }
+                </div>
+            }
+        }
+    </div>
+</section>

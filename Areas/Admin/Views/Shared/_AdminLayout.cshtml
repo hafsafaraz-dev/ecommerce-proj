@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin - BookBazaar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="container">
+            <button class="nav-toggle" id="sidebarToggle" aria-label="Toggle sidebar" style="margin-right: var(--space-sm);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+            <a href="/" class="nav-brand">BookBazaar Admin</a>
+            <div class="nav-right">
+                <a href="/" class="btn btn-text nav-desktop-only">View Site</a>
+                <form asp-controller="Account" asp-action="Logout" asp-area="" method="post" style="display:inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-text">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-layout">
+        <nav class="admin-sidebar" id="adminSidebar">
+            <a href="/Admin/Dashboard" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">Dashboard</a>
+            <a href="/Admin/Books" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Books" ? "active" : "")">Books</a>
+            <a href="/Admin/Categories" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Categories" ? "active" : "")">Categories</a>
+            <a href="/Admin/Orders" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Orders" ? "active" : "")">Orders</a>
+            <a href="/Admin/Users" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">Users</a>
+            <a href="/Admin/Reviews" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Reviews" ? "active" : "")">Reviews</a>
+            <a href="/" class="nav-mobile-only" style="margin-top: var(--space-md); border-top: 1px solid var(--color-surface-dark-elevated);">← View Site</a>
+        </nav>
+        <div class="admin-content">
+            @if (TempData["Success"] != null)
+            {
+                <div style="background: var(--color-success); color: white; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-md); margin-bottom: var(--space-md);">@TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div style="background: var(--color-error); color: white; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-md); margin-bottom: var(--space-md);">@TempData["Error"]</div>
+            }
+            @RenderBody()
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

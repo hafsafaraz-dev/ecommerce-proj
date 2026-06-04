@@ -1,0 +1,23 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<section class="section">
+    <div class="container" style="text-align: center; max-width: 500px; margin: 0 auto;">
+        <div style="font-size: 80px; margin-bottom: var(--space-md);">⚠️</div>
+        <h1>Something went wrong</h1>
+        <p class="text-muted" style="font-size: 18px;">An error occurred while processing your request.</p>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="card" style="margin-bottom: var(--space-md);">
+                <p style="font-size: 13px; margin: 0;">
+                    <span class="text-muted">Request ID:</span> <code>@Model.RequestId</code>
+                </p>
+            </div>
+        }
+
+        <a href="/" class="btn btn-primary btn-lg">Go Home</a>
+    </div>
+</section>

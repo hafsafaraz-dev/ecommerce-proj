@@ -1,0 +1,58 @@
+@model Book
+@{
+    ViewData["Title"] = "Add Book";
+}
+
+<h2>Add New Book</h2>
+
+<form method="post" action="/Admin/Books/Create" style="max-width: 600px;">
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" name="Title" class="form-input" required maxlength="200" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Author</label>
+        <input type="text" name="Author" class="form-input" required maxlength="200" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">ISBN</label>
+        <input type="text" name="ISBN" class="form-input" maxlength="20" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea name="Description" class="form-textarea"></textarea>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="form-label">Price ($)</label>
+                <input type="number" name="Price" class="form-input" step="0.01" min="0" required />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="form-label">Stock Quantity</label>
+                <input type="number" name="StockQuantity" class="form-input" min="0" value="0" />
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Category</label>
+        <select name="CategoryId" class="form-select" required>
+            <option value="">Select Category</option>
+            @foreach (var cat in ViewBag.Categories as List<Category> ?? new())
+            {
+                <option value="@cat.Id">@cat.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="form-check-label">
+            <input type="checkbox" name="IsFeatured" value="true" />
+            Featured book
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Book</button>
+    <a href="/Admin/Books" class="btn btn-secondary">Cancel</a>
+</form>

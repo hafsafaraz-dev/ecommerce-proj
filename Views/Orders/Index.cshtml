@@ -1,0 +1,52 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<section class="section">
+    <div class="container">
+        <h1 style="margin-bottom: var(--space-lg);">My Orders</h1>
+
+        @if (!Model.Any())
+        {
+            <div style="text-align: center; padding: var(--space-xxl) 0;">
+                <div style="font-size: 80px; margin-bottom: var(--space-md);">📦</div>
+                <h3>No orders yet</h3>
+                <p class="text-muted" style="margin-bottom: var(--space-lg);">Start shopping to see your orders here.</p>
+                <a href="/Books" class="btn btn-primary btn-lg">Browse Books</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td><span style="font-weight: 500;">@order.OrderNumber</span></td>
+                                <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                <td>@order.OrderItems.Sum(i => i.Quantity)</td>
+                                <td>$@order.TotalAmount.ToString("F2")</td>
+                                <td>
+                                    <span class="badge @(order.Status == OrderStatus.Delivered ? "badge-success" : order.Status == OrderStatus.Cancelled ? "badge-error" : "badge-warning")">@order.Status</span>
+                                </td>
+                                <td><a href="/Orders/Details/@order.Id" class="btn btn-text btn-sm">View</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

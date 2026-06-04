@@ -1,0 +1,51 @@
+@model List<WishlistItem>
+@{
+    ViewData["Title"] = "My Wishlist";
+}
+
+<section class="section">
+    <div class="container">
+        <h1 style="margin-bottom: var(--space-lg);">My Wishlist</h1>
+
+        @if (!Model.Any())
+        {
+            <div style="text-align: center; padding: var(--space-xxl) 0;">
+                <div style="font-size: 80px; margin-bottom: var(--space-md);">♡</div>
+                <h3>Your wishlist is empty</h3>
+                <p class="text-muted" style="margin-bottom: var(--space-lg);">Browse books and add your favorites!</p>
+                <a href="/Books" class="btn btn-primary btn-lg">Browse Books</a>
+            </div>
+        }
+        else
+        {
+            <div class="book-grid">
+                @foreach (var item in Model)
+                {
+                    <div class="book-card">
+                        <a href="/Books/Details/@item.BookId" style="text-decoration: none; color: inherit;">
+                            <div class="book-card-img"><span>📖</span></div>
+                            <div class="book-card-body">
+                                <h3 class="book-card-title">@item.Book.Title</h3>
+                                <p class="book-card-author">@item.Book.Author</p>
+                                <div class="book-card-price">$@item.Book.Price.ToString("F2")</div>
+                                <div style="font-size: 12px; color: var(--color-muted-soft);">@item.Book.Category?.Name</div>
+                            </div>
+                        </a>
+                        <div class="book-card-footer" style="display: flex; gap: var(--space-xs);">
+                            <form method="post" action="/Wishlist/MoveToCart">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-primary btn-sm">Move to Cart</button>
+                            </form>
+                            <form method="post" action="/Wishlist/Remove">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-text btn-sm" style="color: var(--color-error);">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

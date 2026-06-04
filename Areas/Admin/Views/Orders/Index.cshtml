@@ -1,0 +1,47 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Manage Orders";
+    var selectedStatus = ViewBag.SelectedStatus as OrderStatus?;
+}
+
+<h2>Orders</h2>
+
+<div style="display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-lg);">
+    <a href="/Admin/Orders" class="category-tab @(!selectedStatus.HasValue ? "active" : "")">All</a>
+    @foreach (OrderStatus status in Enum.GetValues<OrderStatus>())
+    {
+        <a href="/Admin/Orders?status=@((int)status)" class="category-tab @(selectedStatus == status ? "active" : "")">@status</a>
+    }
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td><span style="font-weight: 500;">@order.OrderNumber</span></td>
+                    <td>@(order.User?.FullName ?? order.User?.UserName ?? "Unknown")</td>
+                    <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                    <td>@order.OrderItems.Sum(i => i.Quantity)</td>
+                    <td>$@order.TotalAmount.ToString("F2")</td>
+                    <td>
+                        <span class="badge @(order.Status == OrderStatus.Delivered ? "badge-success" : order.Status == OrderStatus.Cancelled ? "badge-error" : "badge-warning")">@order.Status</span>
+                    </td>
+                    <td><a href="/Admin/Orders/Details/@order.Id" class="btn btn-text btn-sm">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
