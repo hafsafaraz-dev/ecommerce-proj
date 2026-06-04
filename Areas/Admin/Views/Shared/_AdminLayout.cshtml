@@ -42,11 +42,11 @@
         <div class="admin-content">
             @if (TempData["Success"] != null)
             {
-                <div style="background: var(--color-success); color: white; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-md); margin-bottom: var(--space-md);">@TempData["Success"]</div>
+                <div class="toast toast-success">@TempData["Success"]</div>
             }
             @if (TempData["Error"] != null)
             {
-                <div style="background: var(--color-error); color: white; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-md); margin-bottom: var(--space-md);">@TempData["Error"]</div>
+                <div class="toast toast-error">@TempData["Error"]</div>
             }
             @RenderBody()
         </div>

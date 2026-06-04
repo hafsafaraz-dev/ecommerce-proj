@@ -9,9 +9,7 @@
 
         @if (TempData["Success"] != null)
         {
-            <div style="background: var(--color-success); color: white; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-md); margin-bottom: var(--space-md);">
-                @TempData["Success"]
-            </div>
+            <div class="toast toast-success">@TempData["Success"]</div>
         }
 
         <div class="card" style="margin-bottom: var(--space-lg);">

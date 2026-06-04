@@ -9,15 +9,11 @@
 
         @if (TempData["Success"] != null)
         {
-            <div class="card" style="background: var(--color-success); color: white; padding: var(--space-md); margin-bottom: var(--space-md); border-radius: var(--rounded-md);">
-                @TempData["Success"]
-            </div>
+            <div class="toast toast-success">@TempData["Success"]</div>
         }
         @if (TempData["Error"] != null)
         {
-            <div class="card" style="background: var(--color-error); color: white; padding: var(--space-md); margin-bottom: var(--space-md); border-radius: var(--rounded-md);">
-                @TempData["Error"]
-            </div>
+            <div class="toast toast-error">@TempData["Error"]</div>
         }
 
         <div class="row">

@@ -25,4 +25,11 @@
   if (sidebarOverlay) {
     sidebarOverlay.addEventListener('click', function () { toggleSidebar(false); });
   }
+
+  document.querySelectorAll('.toast').forEach(function (el) {
+    setTimeout(function () {
+      el.classList.add('toast-dismiss');
+      setTimeout(function () { el.remove(); }, 300);
+    }, 2000);
+  });
 });

@@ -1,4 +1,5 @@
 :root {
+  --bs-primary-rgb: 204, 120, 92;
   --color-primary: #cc785c;
   --color-primary-active: #a9583e;
   --color-primary-disabled: #e6dfd8;
@@ -50,6 +51,16 @@
 
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px;
+}
+
+.btn {
+  --bs-btn-focus-shadow-rgb: 204, 120, 92 !important;
+  --bs-btn-active-border-color: var(--color-primary) !important;
 }
 
 body {
@@ -755,6 +766,32 @@ button, input, select, textarea {
 }
 .callout-dark h2, .callout-dark h3, .callout-dark h4 {
   color: var(--color-on-dark);
+}
+
+.toast {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--rounded-md);
+  color: white;
+  margin-bottom: var(--space-md);
+  animation: toast-fade 0.3s ease;
+}
+.toast-success {
+  background: var(--color-primary);
+}
+.toast-error {
+  background: var(--color-error);
+}
+
+@keyframes toast-fade {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast-dismiss {
+  animation: toast-dismiss 0.3s ease forwards;
+}
+@keyframes toast-dismiss {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-8px); }
 }
 
 @media (max-width: 1200px) {
